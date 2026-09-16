@@ -52,7 +52,7 @@ def test_search_falls_back_to_tavily(monkeypatch):
             return False
 
         def text(self, query, max_results):
-            raise RuntimeError("duckduckgo unavailable")
+            raise DuckDuckGoSearchException("duckduckgo unavailable")
 
     class FakeTavilyClient:
         def __init__(self, api_key):

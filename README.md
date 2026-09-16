@@ -16,13 +16,19 @@ Jupyter notebook demonstrating how to provide an LLM with a tool that searches u
    export TAVILY_API_KEY=your-key-here
    ```
 
-3. Start JupyterLab with uv:
+3. Register the project kernel:
+
+   ```bash
+   uv run python -m ipykernel install --user --name genai-search-with-duckduckgo-and-tavily --display-name "Python (genai-search-with-duckduckgo-and-tavily)"
+   ```
+
+4. Start JupyterLab with uv:
 
    ```bash
    uv run jupyter lab
    ```
 
-4. Open `notebook.ipynb`.
+5. Open `notebook.ipynb` and select the `Python (genai-search-with-duckduckgo-and-tavily)` kernel if prompted.
 
 ## Test
 

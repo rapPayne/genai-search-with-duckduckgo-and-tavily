@@ -6,13 +6,8 @@ from tavily import TavilyClient
 
 
 def search_duckduckgo(query: str, max_results: int = 5) -> list[dict]:
-    try:
-        with DDGS() as ddgs:
-            return list(ddgs.text(query, max_results=max_results))
-    except DuckDuckGoSearchException:
-        raise
-    except Exception as error:
-        raise DuckDuckGoSearchException(str(error)) from error
+    with DDGS() as ddgs:
+        return list(ddgs.text(query, max_results=max_results))
 
 
 def search_tavily(query: str, max_results: int = 5) -> list[dict]:
