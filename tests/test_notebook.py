@@ -2,10 +2,14 @@ import json
 from pathlib import Path
 
 import pytest
+from duckduckgo_search.exceptions import DuckDuckGoSearchException
+
+
+NOTEBOOK_PATH = Path(__file__).resolve().parent.parent / "notebook.ipynb"
 
 
 def load_notebook_namespace():
-    notebook = json.loads(Path("notebook.ipynb").read_text())
+    notebook = json.loads(NOTEBOOK_PATH.read_text())
     namespace = {}
 
     for cell in notebook["cells"]:
@@ -57,7 +61,7 @@ def test_search_falls_back_to_tavily(monkeypatch):
             return False
 
         def text(self, query, max_results):
-            raise RuntimeError("duckduckgo unavailable")
+            raise DuckDuckGoSearchException("duckduckgo unavailable")
 
     class FakeTavilyClient:
         def __init__(self, api_key):
@@ -92,7 +96,7 @@ def test_search_raises_when_fallback_is_unavailable(monkeypatch):
             return False
 
         def text(self, query, max_results):
-            raise RuntimeError("duckduckgo unavailable")
+            raise DuckDuckGoSearchException("duckduckgo unavailable")
 
     monkeypatch.delenv("TAVILY_API_KEY", raising=False)
     namespace["DDGS"] = FailingDDGS
