@@ -52,7 +52,7 @@ def test_search_falls_back_to_tavily(monkeypatch):
             return False
 
         def text(self, query, max_results):
-            raise DuckDuckGoSearchException("duckduckgo unavailable")
+            raise RuntimeError("duckduckgo unavailable")
 
     class FakeTavilyClient:
         def __init__(self, api_key):
@@ -97,3 +97,18 @@ def test_search_raises_when_fallback_is_unavailable(monkeypatch):
         match="DuckDuckGo search failed and no Tavily API key is configured.",
     ):
         search_tools.search("hello")
+
+
+def test_search_tavily_requires_api_key(monkeypatch):
+    search_tools = load_search_tools()
+
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "Set TAVILY_API_KEY to enable Tavily fallback searches when "
+            "DuckDuckGo is unavailable."
+        ),
+    ):
+        search_tools.search_tavily("hello")
