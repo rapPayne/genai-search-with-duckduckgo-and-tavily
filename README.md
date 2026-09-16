@@ -23,3 +23,9 @@ Jupyter notebook demonstrating how to provide an LLM with a tool that searches u
    ```
 
 4. Open `notebook.ipynb`.
+
+## Test
+
+```bash
+uv run pytest
+```
