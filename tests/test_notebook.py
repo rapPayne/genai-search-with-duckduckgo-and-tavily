@@ -76,7 +76,7 @@ def test_search_falls_back_to_tavily(monkeypatch):
     }
 
 
-def test_search_raises_when_fallback_is_unavailable(monkeypatch):
+def test_search_delegates_missing_fallback_key_error(monkeypatch):
     search_tools = load_search_tools()
 
     class FailingDDGS:
@@ -94,7 +94,10 @@ def test_search_raises_when_fallback_is_unavailable(monkeypatch):
 
     with pytest.raises(
         RuntimeError,
-        match="DuckDuckGo search failed and no Tavily API key is configured.",
+        match=(
+            "Set TAVILY_API_KEY to enable Tavily fallback searches when "
+            "DuckDuckGo is unavailable."
+        ),
     ):
         search_tools.search("hello")
 

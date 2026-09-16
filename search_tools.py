@@ -35,11 +35,6 @@ def search(query: str, max_results: int = 5) -> dict:
             "results": search_duckduckgo(query=query, max_results=max_results),
         }
     except DuckDuckGoSearchException as duckduckgo_error:
-        if not os.environ.get("TAVILY_API_KEY"):
-            raise RuntimeError(
-                "DuckDuckGo search failed and no Tavily API key is configured."
-            ) from duckduckgo_error
-
         return {
             "provider": "tavily",
             "results": search_tavily(query=query, max_results=max_results),
