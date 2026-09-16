@@ -18,10 +18,7 @@ def search_duckduckgo(query: str, max_results: int = 5) -> list[dict]:
 def search_tavily(query: str, max_results: int = 5) -> list[dict]:
     api_key = os.environ.get("TAVILY_API_KEY")
     if not api_key:
-        raise RuntimeError(
-            "Set TAVILY_API_KEY to enable Tavily fallback searches when "
-            "DuckDuckGo is unavailable."
-        )
+        raise RuntimeError("Set TAVILY_API_KEY to use Tavily search.")
 
     client = TavilyClient(api_key=api_key)
     response = client.search(query=query, max_results=max_results)

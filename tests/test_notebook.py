@@ -94,10 +94,7 @@ def test_search_delegates_missing_fallback_key_error(monkeypatch):
 
     with pytest.raises(
         RuntimeError,
-        match=(
-            "Set TAVILY_API_KEY to enable Tavily fallback searches when "
-            "DuckDuckGo is unavailable."
-        ),
+        match="Set TAVILY_API_KEY to use Tavily search.",
     ):
         search_tools.search("hello")
 
@@ -109,9 +106,6 @@ def test_search_tavily_requires_api_key(monkeypatch):
 
     with pytest.raises(
         RuntimeError,
-        match=(
-            "Set TAVILY_API_KEY to enable Tavily fallback searches when "
-            "DuckDuckGo is unavailable."
-        ),
+        match="Set TAVILY_API_KEY to use Tavily search.",
     ):
         search_tools.search_tavily("hello")
