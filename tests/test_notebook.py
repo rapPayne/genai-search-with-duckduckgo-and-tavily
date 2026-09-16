@@ -1,32 +1,23 @@
-import json
+import importlib.util
 from pathlib import Path
 
 import pytest
 from duckduckgo_search.exceptions import DuckDuckGoSearchException
 
 
-NOTEBOOK_PATH = Path(__file__).resolve().parent.parent / "notebook.ipynb"
+MODULE_PATH = Path(__file__).resolve().parent.parent / "search_tools.py"
 
 
-def load_notebook_namespace():
-    notebook = json.loads(NOTEBOOK_PATH.read_text())
-    namespace = {}
-
-    for cell in notebook["cells"]:
-        if cell["cell_type"] != "code":
-            continue
-
-        source = "".join(cell["source"])
-        if "result = search(query)" in source or "pprint(result[" in source:
-            continue
-
-        exec(compile(source, "notebook.ipynb", "exec"), namespace)
-
-    return namespace
+def load_search_tools():
+    spec = importlib.util.spec_from_file_location("search_tools", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
-def test_search_uses_duckduckgo_results():
-    namespace = load_notebook_namespace()
+def test_search_uses_duckduckgo_results(monkeypatch):
+    search_tools = load_search_tools()
 
     class FakeDDGS:
         def __enter__(self):
@@ -40,9 +31,9 @@ def test_search_uses_duckduckgo_results():
             assert max_results == 2
             return [{"title": "duckduckgo"}]
 
-    namespace["DDGS"] = FakeDDGS
+    monkeypatch.setattr(search_tools, "DDGS", FakeDDGS)
 
-    result = namespace["search"]("hello", max_results=2)
+    result = search_tools.search("hello", max_results=2)
 
     assert result == {
         "provider": "duckduckgo",
@@ -51,7 +42,7 @@ def test_search_uses_duckduckgo_results():
 
 
 def test_search_falls_back_to_tavily(monkeypatch):
-    namespace = load_notebook_namespace()
+    search_tools = load_search_tools()
 
     class FailingDDGS:
         def __enter__(self):
@@ -73,10 +64,10 @@ def test_search_falls_back_to_tavily(monkeypatch):
             return {"results": [{"title": "tavily"}]}
 
     monkeypatch.setenv("TAVILY_API_KEY", "test-key")
-    namespace["DDGS"] = FailingDDGS
-    namespace["TavilyClient"] = FakeTavilyClient
+    monkeypatch.setattr(search_tools, "DDGS", FailingDDGS)
+    monkeypatch.setattr(search_tools, "TavilyClient", FakeTavilyClient)
 
-    result = namespace["search"]("hello", max_results=2)
+    result = search_tools.search("hello", max_results=2)
 
     assert result == {
         "provider": "tavily",
@@ -86,7 +77,7 @@ def test_search_falls_back_to_tavily(monkeypatch):
 
 
 def test_search_raises_when_fallback_is_unavailable(monkeypatch):
-    namespace = load_notebook_namespace()
+    search_tools = load_search_tools()
 
     class FailingDDGS:
         def __enter__(self):
@@ -99,10 +90,10 @@ def test_search_raises_when_fallback_is_unavailable(monkeypatch):
             raise DuckDuckGoSearchException("duckduckgo unavailable")
 
     monkeypatch.delenv("TAVILY_API_KEY", raising=False)
-    namespace["DDGS"] = FailingDDGS
+    monkeypatch.setattr(search_tools, "DDGS", FailingDDGS)
 
     with pytest.raises(
         RuntimeError,
         match="DuckDuckGo search failed and no Tavily API key is configured.",
     ):
-        namespace["search"]("hello")
+        search_tools.search("hello")
