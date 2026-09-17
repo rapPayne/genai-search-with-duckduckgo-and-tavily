@@ -1,6 +1,8 @@
 # genai-search-with-duckduckgo-and-tavily
 
-Jupyter notebook demonstrating how to provide an LLM with a tool that searches using DuckDuckGo (free) with Tavily as a fallback.
+Jupyter notebook running an LLM (via [OpenRouter](https://openrouter.ai), through [LangChain](https://python.langchain.com)) with a `search` tool. The model decides when to search; the tool itself searches DuckDuckGo (free) with Tavily as a fallback.
+
+By default the notebook uses `anthropic/claude-haiku-4.5` as the model — change the `MODEL` variable in `notebook.ipynb` to use a different OpenRouter model.
 
 ## Run with uv
 
@@ -10,11 +12,14 @@ Jupyter notebook demonstrating how to provide an LLM with a tool that searches u
    uv sync --dev
    ```
 
-2. Optionally export a Tavily API key for fallback searches:
+2. Copy `.env.example` to `.env` and fill in your API keys:
 
    ```bash
-   export TAVILY_API_KEY=your-key-here
+   cp .env.example .env
    ```
+
+   - `OPENROUTER_API_KEY` — required, used for inference.
+   - `TAVILY_API_KEY` — optional, used only as a fallback when DuckDuckGo fails.
 
 3. Register the project kernel:
 
@@ -29,9 +34,3 @@ Jupyter notebook demonstrating how to provide an LLM with a tool that searches u
    ```
 
 5. Open `notebook.ipynb` and select the `Python (genai-search-with-duckduckgo-and-tavily)` kernel if prompted.
-
-## Test
-
-```bash
-uv run pytest
-```
